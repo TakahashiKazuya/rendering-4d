@@ -1,10 +1,3 @@
-//
-//  ContentView.swift
-//  Rendering4D
-//
-//  Created by kazuya on 2025/05/06.
-//
-
 import SwiftUI
 
 struct ContentView: View {
