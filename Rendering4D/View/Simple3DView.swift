@@ -41,6 +41,9 @@ struct Simple3DView: UIViewRepresentable {
         let view = SCNView()
         view.scene = scene
         view.allowsCameraControl = true
+        view.defaultCameraController.automaticTarget = false
+        // target が (0, 0, 0) に近いと効かなくなるバグがあるっぽいので少しずらす
+        view.defaultCameraController.target = SCNVector3(0, 0, 1e-20)
 
         return view
     }
