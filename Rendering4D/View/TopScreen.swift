@@ -14,6 +14,11 @@ struct TopScreen: View {
                 } label: {
                     Text("Primitive Rendering")
                 }
+                NavigationLink {
+                    PrettyPrimitiveRenderingView()
+                } label: {
+                    Text("Primitive Rendering (Pretty Edge)")
+                }
             }
         }
     }
