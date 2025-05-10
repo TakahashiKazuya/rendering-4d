@@ -5,9 +5,9 @@ struct TopScreen: View {
         NavigationStack {
             List {
                 NavigationLink {
-                    ContentView()
+                    Simple3DView()
                 } label: {
-                    Text("Content")
+                    Text("Simple 3D")
                 }
             }
         }
