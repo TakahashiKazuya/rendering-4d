@@ -10,7 +10,7 @@ struct PrettyPrimitiveRenderingView: UIViewRepresentable {
             .extrude(from: -1, to: 1)
 
         let geometryNodes = cube.edges.map { edge in
-            makePrettyEdgeGeometry(
+            makePrettyEdgeGeometryNode(
                 startVertex: cube.vertices[edge.startVertexIndex],
                 endVertex: cube.vertices[edge.endVertexIndex],
             )
@@ -60,7 +60,7 @@ struct PrettyPrimitiveRenderingView: UIViewRepresentable {
 
     func updateUIView(_ view: SCNView, context: Context) {}
 
-    func makePrettyEdgeGeometry(startVertex: Vector, endVertex: Vector) -> SCNNode {
+    func makePrettyEdgeGeometryNode(startVertex: Vector, endVertex: Vector) -> SCNNode {
         let length = (endVertex - startVertex).normL2()
         let capRadius = 0.1
         let cupsule = SCNCapsule(capRadius: capRadius, height: length + 2 * capRadius)
