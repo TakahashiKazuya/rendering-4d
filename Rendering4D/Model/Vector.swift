@@ -57,3 +57,16 @@ extension Vector {
         return Vector(component + [element])
     }
 }
+
+extension Vector {
+    func affineTransform(by m: Matrix) -> Vector {
+        precondition(m.numRows == dim + 1 && m.numCols == dim + 1)
+
+        let transformedHomVector = m * self.extend(by: 1)
+        let dividedComponent = (0..<dim).map { i in
+            transformedHomVector[i] / transformedHomVector[dim]
+        }
+
+        return Vector(dividedComponent)
+    }
+}
