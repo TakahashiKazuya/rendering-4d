@@ -29,6 +29,11 @@ struct TopScreen: View {
                 } label: {
                     Text("Render 4D")
                 }
+                NavigationLink {
+                    Rotation4DView()
+                } label: {
+                    Text("4D Rotation")
+                }
             }
         }
     }
