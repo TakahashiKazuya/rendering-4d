@@ -24,6 +24,16 @@ struct TopScreen: View {
                 } label: {
                     Text("Custom Camera")
                 }
+                NavigationLink {
+                    Rendering4DView()
+                } label: {
+                    Text("Render 4D")
+                }
+                NavigationLink {
+                    Rotation4DView()
+                } label: {
+                    Text("4D Rotation")
+                }
             }
         }
     }
