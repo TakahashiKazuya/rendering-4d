@@ -41,6 +41,7 @@ struct Rotation4DView: View {
             )
             Text(rotationTypeText)
                 .font(.title)
+                .colorScheme(.light)
                 .padding()
         }
     }
