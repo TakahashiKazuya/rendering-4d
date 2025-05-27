@@ -39,10 +39,16 @@ struct Rotation4DView: View {
                 projectionNear: 1,
                 projectionFar: 10,
             )
-            Text(rotationTypeText)
-                .font(.title)
-                .colorScheme(.light)
-                .padding()
+
+            VStack(alignment: .leading) {
+                Text(rotationTypeText)
+                    .font(.title)
+                Spacer()
+                Text("one-finger drag: 3D Rotation")
+                Text("two-finger drag: 4D Rotation")
+            }
+            .colorScheme(.light)
+            .padding()
         }
     }
 }
