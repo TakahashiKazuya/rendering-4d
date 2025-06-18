@@ -17,10 +17,13 @@ struct CustomCameraView: View {
     }
 
     var body: some View {
-        CustomCameraSceneView(
-            shape: cube,
-            cameraPosition: $cameraPosition,
-        )
+        ZStack {
+            CustomCameraSceneView(
+                shape: cube,
+                cameraPosition: cameraPosition
+            )
+            CustomCameraGestureRecognizerView(cameraPosition: $cameraPosition)
+        }
     }
 }
 
