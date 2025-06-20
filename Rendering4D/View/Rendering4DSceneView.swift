@@ -1,167 +1,132 @@
-import SceneKit
+import RealityKit
 import SwiftUI
 
-struct Rendering4DSceneView: UIViewRepresentable {
+struct Rendering4DSceneView: View {
     let shape: Shape
-    @Binding var cameraPosition: CameraPosition4D
+    let cameraPosition: CameraPosition4D
     let projectionCenter: Vector
     let projectionNear: Double
     let projectionFar: Double
 
-    func makeUIView(context: Context) -> SCNView {
-        let geometryParentNode = SCNNode()
-        geometryParentNode.name = "geometryParentNode"
+    @StateObject private var store = Rendering4DSceneViewStore()
 
-        // geometry
-        let projectedShape =
-            shape
-            .affineTransform(by: cameraPosition.transformationMatrix)
-            .projection(
-                center: projectionCenter,
-                near: projectionNear,
-                far: projectionFar,
-            )
+    var body: some View {
+        RealityView(
+            make: { content in
+                // model
+                let projectedShape =
+                    shape
+                    .affineTransform(by: cameraPosition.transformationMatrix)
+                    .projection(
+                        center: projectionCenter,
+                        near: projectionNear,
+                        far: projectionFar,
+                    )
 
-        let geometryNodes = projectedShape.edges.map { edge in
-            makePrettyEdgeGeometryNode(
-                startVertex: projectedShape.vertices[edge.startVertexIndex],
-                endVertex: projectedShape.vertices[edge.endVertexIndex],
-            )
-        }
+                store.entities = projectedShape.edges.map { edge in
+                    makePrettyEdgeEntities()
+                }
+                projectedShape.edges.enumerated().forEach { index, edge in
+                    updateEdgeEntities(
+                        index: index,
+                        startVertex: projectedShape.vertices[edge.startVertexIndex],
+                        endVertex: projectedShape.vertices[edge.endVertexIndex],
+                    )
+                }
+                for entity in store.entities.joined() {
+                    content.add(entity)
+                }
 
-        // light
-        let directionalLight = SCNLight()
-        directionalLight.type = .directional
+                // light
+                let lightEntity = DirectionalLight()
+                lightEntity.position = [4, 8, 2]
+                lightEntity.look(at: [0, 0, 0], from: lightEntity.position, relativeTo: nil)
+                content.add(lightEntity)
 
-        let lightNode = SCNNode()
-        lightNode.light = directionalLight
-        lightNode.position = SCNVector3(4, 8, 2)
-        lightNode.look(at: SCNVector3(0, 0, 0))
+                // camera
+                let cameraEntity = PerspectiveCamera()
+                cameraEntity.position = [0, 0, 0]
+                cameraEntity.look(at: [0, 0, -1], from: cameraEntity.position, relativeTo: nil)
+                content.add(cameraEntity)
+            },
+            update: { content in
+                let projectedShape =
+                    shape
+                    .affineTransform(by: cameraPosition.transformationMatrix)
+                    .projection(
+                        center: projectionCenter,
+                        near: projectionNear,
+                        far: projectionFar,
+                    )
 
-        let ambientLight = SCNLight()
-        ambientLight.type = .ambient
-        ambientLight.intensity = 200
-
-        let ambientLightNode = SCNNode()
-        ambientLightNode.light = ambientLight
-
-        // camera
-        let camera = SCNCamera()
-
-        let cameraNode = SCNNode()
-        cameraNode.camera = camera
-        cameraNode.position = SCNVector3(0, 0, 0)
-        cameraNode.look(at: SCNVector3(0, 0, -1))
-
-        let scene = SCNScene()
-        scene.rootNode.addChildNode(geometryParentNode)
-        for geometryNode in geometryNodes {
-            geometryParentNode.addChildNode(geometryNode)
-        }
-        scene.rootNode.addChildNode(lightNode)
-        scene.rootNode.addChildNode(ambientLightNode)
-        scene.rootNode.addChildNode(cameraNode)
-
-        let view = SCNView()
-        view.scene = scene
-
-        // custom camera control
-        let dragGestureRecognizer = UIPanGestureRecognizer(
-            target: context.coordinator,
-            action: #selector(Coordinator.handleDrag(_:)),
-        )
-        dragGestureRecognizer.minimumNumberOfTouches = 1
-        dragGestureRecognizer.maximumNumberOfTouches = 1
-        view.addGestureRecognizer(dragGestureRecognizer)
-
-        return view
-    }
-
-    func updateUIView(_ view: SCNView, context: Context) {
-        let projectedShape =
-            shape
-            .affineTransform(by: cameraPosition.transformationMatrix)
-            .projection(
-                center: projectionCenter,
-                near: projectionNear,
-                far: projectionFar,
-            )
-
-        let geometryNodes = projectedShape.edges.map { edge in
-            makePrettyEdgeGeometryNode(
-                startVertex: projectedShape.vertices[edge.startVertexIndex],
-                endVertex: projectedShape.vertices[edge.endVertexIndex],
-            )
-        }
-
-        let geometryParentNode = view.scene!.rootNode.childNode(
-            withName: "geometryParentNode",
-            recursively: false,
-        )!
-
-        // delete old geometries
-        geometryParentNode.childNodes
-            .filter { $0.geometry != nil }
-            .forEach { $0.removeFromParentNode() }
-
-        for geometryNode in geometryNodes {
-            geometryParentNode.addChildNode(geometryNode)
-        }
-    }
-
-    func makeCoordinator() -> Coordinator {
-        Coordinator(cameraPosition: $cameraPosition)
-    }
-
-    class Coordinator {
-        static let rotationSensitivity: Double = 0.008
-
-        @Binding var cameraPosition: CameraPosition4D
-
-        init(cameraPosition: Binding<CameraPosition4D>) {
-            self._cameraPosition = cameraPosition
-        }
-
-        @objc func handleDrag(_ gestureRecognizer: UIPanGestureRecognizer) {
-            switch gestureRecognizer.state {
-            case .changed:
-                let translation = gestureRecognizer.translation(in: gestureRecognizer.view)
-                let deltaX = translation.x
-                let deltaY = -translation.y
-                let axisAngle = atan2InDegree(deltaY, deltaX)
-                let rotationAngle = atanInDegree(hypot(deltaX, deltaY) * Self.rotationSensitivity)
-
-                let rotationMatrix =
-                    Matrix.of4DRotationOnXY(byDegree: axisAngle)
-                    * Matrix.of4DRotationOnZX(byDegree: -rotationAngle)
-                    * Matrix.of4DRotationOnXY(byDegree: -axisAngle)
-
-                cameraPosition = cameraPosition.rotate(by: rotationMatrix)
-                gestureRecognizer.setTranslation(.zero, in: gestureRecognizer.view)
-            default:
-                break
+                projectedShape.edges.enumerated().forEach { index, edge in
+                    updateEdgeEntities(
+                        index: index,
+                        startVertex: projectedShape.vertices[edge.startVertexIndex],
+                        endVertex: projectedShape.vertices[edge.endVertexIndex],
+                    )
+                }
             }
-        }
-    }
-
-    func makePrettyEdgeGeometryNode(startVertex: Vector, endVertex: Vector) -> SCNNode {
-        let length = (endVertex - startVertex).normL2()
-        let capRadius = 0.1
-        let cupsule = SCNCapsule(capRadius: capRadius, height: length + 2 * capRadius)
-        cupsule.firstMaterial?.diffuse.contents = UIColor.red
-
-        let geometryNode = SCNNode()
-        geometryNode.geometry = cupsule
-        geometryNode.localTranslate(by: SCNVector3(startVertex[0], startVertex[1], startVertex[2]))
-        geometryNode.look(
-            at: SCNVector3(endVertex[0], endVertex[1], endVertex[2]),
-            up: geometryNode.worldUp,
-            localFront: SCNVector3(0, 1, 0),
         )
-        geometryNode.localTranslate(by: SCNVector3(0, length / 2, 0))
-
-        return geometryNode
     }
+
+    func makePrettyEdgeEntities() -> [Entity] {
+        let radius = 0.1
+
+        let material = SimpleMaterial(color: .red, roughness: 1.0, isMetallic: false)
+
+        let cylinderMesh = MeshResource.generateCylinder(height: 1.0, radius: Float(radius))
+        let cylinderEntity = ModelEntity(
+            mesh: cylinderMesh,
+            materials: [material],
+        )
+
+        let sphereMesh = MeshResource.generateSphere(radius: Float(radius))
+        let startSphereEntity = ModelEntity(
+            mesh: sphereMesh,
+            materials: [material],
+        )
+        let endSphereEntity = ModelEntity(
+            mesh: sphereMesh,
+            materials: [material],
+        )
+
+        return [cylinderEntity, startSphereEntity, endSphereEntity]
+    }
+
+    func updateEdgeEntities(index: Int, startVertex: Vector, endVertex: Vector) {
+        let length = (endVertex - startVertex).normL2()
+        let dirVector = (endVertex - startVertex).normalized()
+        let orthVector1 =
+            if dirVector[0] != 0 || dirVector[1] != 0 {
+                Vector([dirVector[1], -dirVector[0], 0]).normalized()
+            } else {
+                Vector([dirVector[2], 0, -dirVector[0]]).normalized()
+            }
+        let orthVector2 = dirVector.cross(orthVector1).normalized()
+
+        let cylinderTransformMatrix =
+            Matrix.of3DAffineTranslation(by: startVertex)
+            * Matrix.of3DAffineRotation(
+                by: Matrix(rows: [
+                    [orthVector2[0], dirVector[0], orthVector1[0]],
+                    [orthVector2[1], dirVector[1], orthVector1[1]],
+                    [orthVector2[2], dirVector[2], orthVector1[2]],
+                ])
+            )
+            * Matrix.of3DAffineTranslation(by: Vector([0, length / 2, 0]))
+            * Matrix.of3DAffineScale(by: Vector([1, length, 1]))
+
+        store.entities[index][0].transform = Transform(
+            matrix: float4x4(rows: cylinderTransformMatrix.rows.map { SIMD4($0.map { Float($0) }) })
+        )
+        store.entities[index][1].position = SIMD3(startVertex.component.map { Float($0) })
+        store.entities[index][2].position = SIMD3(endVertex.component.map { Float($0) })
+    }
+}
+
+class Rendering4DSceneViewStore: ObservableObject {
+    var entities: [[Entity]] = []
 }
 
 #Preview {
@@ -186,7 +151,7 @@ struct Rendering4DSceneView: UIViewRepresentable {
 
     Rendering4DSceneView(
         shape: hyperCube,
-        cameraPosition: $cameraPosition,
+        cameraPosition: cameraPosition,
         projectionCenter: Vector([0, 0, -4, 2]),
         projectionNear: 1,
         projectionFar: 10,

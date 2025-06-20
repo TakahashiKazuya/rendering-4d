@@ -18,13 +18,16 @@ struct Rendering4DView: View {
     }
 
     var body: some View {
-        Rendering4DSceneView(
-            shape: hyperCube,
-            cameraPosition: $cameraPosition,
-            projectionCenter: Vector([0, 0, -8, 2]),
-            projectionNear: 1,
-            projectionFar: 10,
-        )
+        ZStack {
+            Rendering4DSceneView(
+                shape: hyperCube,
+                cameraPosition: cameraPosition,
+                projectionCenter: Vector([0, 0, -8, 2]),
+                projectionNear: 1,
+                projectionFar: 10,
+            )
+            Rendering4DGestureRecognizerView(cameraPosition: $cameraPosition)
+        }
     }
 }
 
