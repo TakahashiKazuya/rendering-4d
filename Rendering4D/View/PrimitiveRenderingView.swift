@@ -1,7 +1,7 @@
 import RealityKit
 import SwiftUI
 
-struct PrettyPrimitiveRenderingView: View {
+struct PrimitiveRenderingView: View {
     var body: some View {
         RealityView { content in
             // model
@@ -92,5 +92,5 @@ struct PrettyPrimitiveRenderingView: View {
 }
 
 #Preview {
-    PrettyPrimitiveRenderingView()
+    PrimitiveRenderingView()
 }

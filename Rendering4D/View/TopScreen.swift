@@ -10,7 +10,7 @@ struct TopScreen: View {
                     Text("Simple 3D")
                 }
                 NavigationLink {
-                    PrettyPrimitiveRenderingView()
+                    PrimitiveRenderingView()
                 } label: {
                     Text("Primitive Rendering")
                 }
