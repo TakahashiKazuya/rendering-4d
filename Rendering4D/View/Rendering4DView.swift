@@ -19,7 +19,7 @@ struct Rendering4DView: View {
 
     var body: some View {
         ZStack {
-            Rendering4DSceneView(
+            Rendering4DRealityView(
                 shape: hyperCube,
                 cameraPosition: cameraPosition,
                 projectionCenter: Vector([0, 0, -8, 2]),

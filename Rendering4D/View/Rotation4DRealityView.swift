@@ -1,14 +1,14 @@
 import RealityKit
 import SwiftUI
 
-struct Rotation4DSceneView: View {
+struct Rotation4DRealityView: View {
     let shape: Shape
     let cameraPosition: CameraPosition4D
     let projectionCenter: Vector
     let projectionNear: Double
     let projectionFar: Double
 
-    @StateObject private var store = Rotation4DSceneViewStore()
+    @StateObject private var store = Rotation4DRealityViewStore()
 
     var body: some View {
         RealityView(
@@ -125,7 +125,7 @@ struct Rotation4DSceneView: View {
     }
 }
 
-class Rotation4DSceneViewStore: ObservableObject {
+class Rotation4DRealityViewStore: ObservableObject {
     var entities: [[Entity]] = []
 }
 
@@ -149,7 +149,7 @@ class Rotation4DSceneViewStore: ObservableObject {
         .extrude(from: -1, to: 1)
         .extrude(from: -1, to: 1)
 
-    Rotation4DSceneView(
+    Rotation4DRealityView(
         shape: hyperCube,
         cameraPosition: cameraPosition,
         projectionCenter: Vector([0, 0, -4, 2]),

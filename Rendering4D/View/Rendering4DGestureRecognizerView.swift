@@ -1,4 +1,3 @@
-import SceneKit
 import SwiftUI
 
 struct Rendering4DGestureRecognizerView: UIViewRepresentable {

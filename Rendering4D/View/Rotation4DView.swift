@@ -31,7 +31,7 @@ struct Rotation4DView: View {
 
     var body: some View {
         ZStack(alignment: .topLeading) {
-            Rotation4DSceneView(
+            Rotation4DRealityView(
                 shape: hyperCube,
                 cameraPosition: cameraPosition,
                 projectionCenter: Vector([0, 0, -8, 2]),

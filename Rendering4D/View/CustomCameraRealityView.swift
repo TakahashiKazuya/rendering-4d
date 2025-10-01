@@ -1,7 +1,7 @@
 import RealityKit
 import SwiftUI
 
-struct CustomCameraSceneView: View {
+struct CustomCameraRealityView: View {
     let shape: Shape
     let cameraPosition: CameraPosition3D
 
@@ -125,7 +125,7 @@ struct CustomCameraSceneView: View {
             ]),
     )
 
-    CustomCameraSceneView(
+    CustomCameraRealityView(
         shape: cube,
         cameraPosition: cameraPosition,
     )

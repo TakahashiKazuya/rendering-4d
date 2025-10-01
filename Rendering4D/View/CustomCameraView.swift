@@ -18,7 +18,7 @@ struct CustomCameraView: View {
 
     var body: some View {
         ZStack {
-            CustomCameraSceneView(
+            CustomCameraRealityView(
                 shape: cube,
                 cameraPosition: cameraPosition
             )

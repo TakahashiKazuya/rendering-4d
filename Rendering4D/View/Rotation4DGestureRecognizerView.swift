@@ -1,4 +1,3 @@
-import SceneKit
 import SwiftUI
 
 enum RotationType {
@@ -100,24 +99,5 @@ struct Rotation4DGestureRecognizerView: UIViewRepresentable {
                 break
             }
         }
-    }
-
-    func makePrettyEdgeGeometryNode(startVertex: Vector, endVertex: Vector) -> SCNNode {
-        let length = (endVertex - startVertex).normL2()
-        let capRadius = 0.1
-        let cupsule = SCNCapsule(capRadius: capRadius, height: length + 2 * capRadius)
-        cupsule.firstMaterial?.diffuse.contents = UIColor.red
-
-        let geometryNode = SCNNode()
-        geometryNode.geometry = cupsule
-        geometryNode.localTranslate(by: SCNVector3(startVertex[0], startVertex[1], startVertex[2]))
-        geometryNode.look(
-            at: SCNVector3(endVertex[0], endVertex[1], endVertex[2]),
-            up: geometryNode.worldUp,
-            localFront: SCNVector3(0, 1, 0),
-        )
-        geometryNode.localTranslate(by: SCNVector3(0, length / 2, 0))
-
-        return geometryNode
     }
 }
