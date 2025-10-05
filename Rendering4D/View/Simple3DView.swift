@@ -23,7 +23,9 @@ struct Simple3DView: View {
             cameraEntity.position = [3, 4, 6]
             cameraEntity.look(at: [0, 0, 0], from: cameraEntity.position, relativeTo: nil)
             content.add(cameraEntity)
-        }.realityViewCameraControls(CameraControls.orbit)
+        }
+        .realityViewCameraControls(CameraControls.orbit)
+        .background(Color.white)
     }
 }
 

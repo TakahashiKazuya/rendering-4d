@@ -24,6 +24,7 @@ struct CustomCameraView: View {
             )
             CustomCameraGestureRecognizerView(cameraPosition: $cameraPosition)
         }
+        .background(Color.white)
     }
 }
 

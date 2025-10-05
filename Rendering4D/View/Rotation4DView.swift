@@ -50,6 +50,7 @@ struct Rotation4DView: View {
             .colorScheme(.light)
             .padding()
         }
+        .background(Color.white)
     }
 }
 

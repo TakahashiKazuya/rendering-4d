@@ -28,6 +28,7 @@ struct Rendering4DView: View {
             )
             Rendering4DGestureRecognizerView(cameraPosition: $cameraPosition)
         }
+        .background(Color.white)
     }
 }
 
