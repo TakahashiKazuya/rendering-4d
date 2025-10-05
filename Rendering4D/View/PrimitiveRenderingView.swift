@@ -1,72 +1,96 @@
-import SceneKit
+import RealityKit
 import SwiftUI
 
-struct PrimitiveRenderingView: UIViewRepresentable {
-    func makeUIView(context: Context) -> SCNView {
-        // geometry
-        let cube = Shape(vertices: [Vector([])], edges: [])
-            .extrude(from: -1, to: 1)
-            .extrude(from: -1, to: 1)
-            .extrude(from: -1, to: 1)
+struct PrimitiveRenderingView: View {
+    var body: some View {
+        RealityView { content in
+            // model
+            let cube = Shape(vertices: [Vector([])], edges: [])
+                .extrude(from: -1, to: 1)
+                .extrude(from: -1, to: 1)
+                .extrude(from: -1, to: 1)
 
-        let vertices = cube.vertices.map { vertex in SCNVector3(vertex[0], vertex[1], vertex[2]) }
-        let geometrySource = SCNGeometrySource(vertices: vertices)
+            let modelEntities = cube.edges.map { edge in
+                makePrettyEdgeEntity(
+                    startVertex: cube.vertices[edge.startVertexIndex],
+                    endVertex: cube.vertices[edge.endVertexIndex],
+                )
+            }
+            for entity in modelEntities {
+                content.add(entity)
+            }
 
-        let indices: [Int32] = cube.edges.flatMap { edge in [Int32(edge.startVertexIndex), Int32(edge.endVertexIndex)] }
-        let data = Data(bytes: indices, count: MemoryLayout<Int32>.size * indices.count)
-        let geometryElement = SCNGeometryElement(
-            data: data,
-            primitiveType: .line,
-            primitiveCount: cube.edges.count,
-            bytesPerIndex: MemoryLayout<Int32>.size,
-        )
+            // light
+            let lightEntity = DirectionalLight()
+            lightEntity.position = [4, 8, 2]
+            lightEntity.look(at: [0, 0, 0], from: lightEntity.position, relativeTo: nil)
+            content.add(lightEntity)
 
-        let geometry = SCNGeometry(sources: [geometrySource], elements: [geometryElement])
-        geometry.firstMaterial?.diffuse.contents = UIColor.red
-        let geometryNode = SCNNode()
-        geometryNode.geometry = geometry
-
-        // light
-        let directionalLight = SCNLight()
-        directionalLight.type = .directional
-
-        let lightNode = SCNNode()
-        lightNode.light = directionalLight
-        lightNode.position = SCNVector3(4, 8, 2)
-        lightNode.look(at: SCNVector3(0, 0, 0))
-
-        let ambientLight = SCNLight()
-        ambientLight.type = .ambient
-        ambientLight.intensity = 200
-
-        let ambientLightNode = SCNNode()
-        ambientLightNode.light = ambientLight
-
-        // camera
-        let camera = SCNCamera()
-
-        let cameraNode = SCNNode()
-        cameraNode.camera = camera
-        cameraNode.position = SCNVector3(3, 4, 6)
-        cameraNode.look(at: SCNVector3(0, 0, 0))
-
-        let scene = SCNScene()
-        scene.rootNode.addChildNode(geometryNode)
-        scene.rootNode.addChildNode(lightNode)
-        scene.rootNode.addChildNode(ambientLightNode)
-        scene.rootNode.addChildNode(cameraNode)
-
-        let view = SCNView()
-        view.scene = scene
-        view.allowsCameraControl = true
-        view.defaultCameraController.automaticTarget = false
-        // target が (0, 0, 0) に近いと効かなくなるバグがあるっぽいので少しずらす
-        view.defaultCameraController.target = SCNVector3(0, 0, 1e-20)
-
-        return view
+            // camera
+            let cameraEntity = PerspectiveCamera()
+            cameraEntity.position = [3, 4, 6]
+            cameraEntity.look(at: [0, 0, 0], from: cameraEntity.position, relativeTo: nil)
+            content.add(cameraEntity)
+        }
+        .realityViewCameraControls(CameraControls.orbit)
+        .background(Color.white)
     }
 
-    func updateUIView(_ view: SCNView, context: Context) {}
+    func makePrettyEdgeEntity(startVertex: Vector, endVertex: Vector) -> Entity {
+        let length = (endVertex - startVertex).normL2()
+        let radius = 0.1
+
+        let material = SimpleMaterial(color: .red, roughness: 1.0, isMetallic: false)
+
+        let cylinderMesh = MeshResource.generateCylinder(height: Float(length), radius: Float(radius))
+        let cylinderEntity = ModelEntity(
+            mesh: cylinderMesh,
+            materials: [material],
+        )
+
+        let sphereMesh = MeshResource.generateSphere(radius: Float(radius))
+        let startSphereEntity = ModelEntity(
+            mesh: sphereMesh,
+            materials: [material],
+        )
+        let endSphereEntity = ModelEntity(
+            mesh: sphereMesh,
+            materials: [material],
+        )
+
+        let dirVector = (endVertex - startVertex).normalized()
+        let orthVector1 =
+            if dirVector[0] != 0 || dirVector[1] != 0 {
+                Vector([dirVector[1], -dirVector[0], 0]).normalized()
+            } else {
+                Vector([dirVector[2], 0, -dirVector[0]]).normalized()
+            }
+        let orthVector2 = dirVector.cross(orthVector1).normalized()
+
+        let cylinderTransformMatrix =
+            Matrix.of3DAffineTranslation(by: startVertex)
+            * Matrix.of3DAffineRotation(
+                by: Matrix(rows: [
+                    [orthVector2[0], dirVector[0], orthVector1[0]],
+                    [orthVector2[1], dirVector[1], orthVector1[1]],
+                    [orthVector2[2], dirVector[2], orthVector1[2]],
+                ])
+            )
+            * Matrix.of3DAffineTranslation(by: Vector([0, length / 2, 0]))
+        cylinderEntity.transform = Transform(
+            matrix: float4x4(rows: cylinderTransformMatrix.rows.map { SIMD4($0.map { Float($0) }) })
+        )
+
+        startSphereEntity.position = SIMD3(startVertex.component.map { Float($0) })
+        endSphereEntity.position = SIMD3(endVertex.component.map { Float($0) })
+
+        let anchorEntity = AnchorEntity()
+        anchorEntity.addChild(startSphereEntity)
+        anchorEntity.addChild(endSphereEntity)
+        anchorEntity.addChild(cylinderEntity)
+
+        return anchorEntity
+    }
 }
 
 #Preview {

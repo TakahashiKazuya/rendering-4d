@@ -15,11 +15,6 @@ struct TopScreen: View {
                     Text("Primitive Rendering")
                 }
                 NavigationLink {
-                    PrettyPrimitiveRenderingView()
-                } label: {
-                    Text("Primitive Rendering (Pretty Edge)")
-                }
-                NavigationLink {
                     CustomCameraView()
                 } label: {
                     Text("Custom Camera")

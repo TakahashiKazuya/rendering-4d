@@ -31,14 +31,14 @@ struct Rotation4DView: View {
 
     var body: some View {
         ZStack(alignment: .topLeading) {
-            Rotation4DSceneView(
+            Rotation4DRealityView(
                 shape: hyperCube,
-                cameraPosition: $cameraPosition,
-                rotationType: $rotationType,
+                cameraPosition: cameraPosition,
                 projectionCenter: Vector([0, 0, -8, 2]),
                 projectionNear: 1,
                 projectionFar: 10,
             )
+            Rotation4DGestureRecognizerView(cameraPosition: $cameraPosition, rotationType: $rotationType)
 
             VStack(alignment: .leading) {
                 Text(rotationTypeText)
@@ -50,6 +50,7 @@ struct Rotation4DView: View {
             .colorScheme(.light)
             .padding()
         }
+        .background(Color.white)
     }
 }
 

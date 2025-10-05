@@ -40,6 +40,12 @@ extension Vector {
 
         return v1 + (-v2)
     }
+
+    static func / (v: Vector, a: Double) -> Vector {
+        precondition(a != 0)
+
+        return (1 / a) * v
+    }
 }
 
 extension Vector {
@@ -49,6 +55,20 @@ extension Vector {
                 acc + element * element
             }
         )
+    }
+
+    func normalized() -> Vector {
+        return self / normL2()
+    }
+
+    func cross(_ v: Vector) -> Vector {
+        precondition(dim == 3 && v.dim == 3)
+
+        return Vector([
+            self[1] * v[2] - self[2] * v[1],
+            self[2] * v[0] - self[0] * v[2],
+            self[0] * v[1] - self[1] * v[0],
+        ])
     }
 }
 
