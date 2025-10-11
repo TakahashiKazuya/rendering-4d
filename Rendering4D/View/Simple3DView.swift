@@ -9,18 +9,18 @@ struct Simple3DView: View {
                 mesh: .generateBox(size: 2),
                 materials: [SimpleMaterial(color: .red, roughness: 1.0, isMetallic: false)],
             )
-            boxEntity.position = [0, 0, 0]
+            boxEntity.setPosition([0, 0, 0], relativeTo: nil)
             content.add(boxEntity)
 
             // light
             let lightEntity = DirectionalLight()
-            lightEntity.position = [4, 8, 2]
+            lightEntity.setPosition([4, 8, 2], relativeTo: nil)
             lightEntity.look(at: [0, 0, 0], from: lightEntity.position, relativeTo: nil)
             content.add(lightEntity)
 
             // camera
             let cameraEntity = PerspectiveCamera()
-            cameraEntity.position = [3, 4, 6]
+            cameraEntity.setPosition([3, 4, 6], relativeTo: nil)
             cameraEntity.look(at: [0, 0, 0], from: cameraEntity.position, relativeTo: nil)
             content.add(cameraEntity)
         }
