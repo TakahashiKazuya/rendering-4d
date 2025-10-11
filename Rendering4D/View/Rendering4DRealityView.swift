@@ -117,8 +117,9 @@ struct Rendering4DRealityView: View {
             * Matrix.of3DAffineTranslation(by: Vector([0, length / 2, 0]))
             * Matrix.of3DAffineScale(by: Vector([1, length, 1]))
 
-        store.entities[index][0].transform = Transform(
-            matrix: float4x4(rows: cylinderTransformMatrix.rows.map { SIMD4($0.map { Float($0) }) })
+        store.entities[index][0].setTransformMatrix(
+            float4x4(rows: cylinderTransformMatrix.rows.map { SIMD4($0.map { Float($0) }) }),
+            relativeTo: nil,
         )
         store.entities[index][1].setPosition(SIMD3(startVertex.component.map { Float($0) }), relativeTo: nil)
         store.entities[index][2].setPosition(SIMD3(endVertex.component.map { Float($0) }), relativeTo: nil)

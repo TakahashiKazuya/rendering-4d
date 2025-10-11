@@ -11,8 +11,9 @@ struct CustomCameraRealityView: View {
                 let anchorEntity = AnchorEntity()
                 anchorEntity.name = "anchorForCameraTransformation"
                 content.add(anchorEntity)
-                anchorEntity.transform = Transform(
-                    matrix: float4x4(rows: cameraPosition.transformationMatrix.rows.map { SIMD4($0.map { Float($0) }) })
+                anchorEntity.setTransformMatrix(
+                    float4x4(rows: cameraPosition.transformationMatrix.rows.map { SIMD4($0.map { Float($0) }) }),
+                    relativeTo: nil,
                 )
 
                 // model
@@ -46,10 +47,9 @@ struct CustomCameraRealityView: View {
                     return
                 }
 
-                anchorEntity.transform = Transform(
-                    matrix: float4x4(
-                        rows: cameraPosition.transformationMatrix.rows.map { SIMD4($0.map { Float($0) }) }
-                    )
+                anchorEntity.setTransformMatrix(
+                    float4x4(rows: cameraPosition.transformationMatrix.rows.map { SIMD4($0.map { Float($0) }) }),
+                    relativeTo: nil,
                 )
             }
         )
@@ -96,8 +96,9 @@ struct CustomCameraRealityView: View {
                 ])
             )
             * Matrix.of3DAffineTranslation(by: Vector([0, length / 2, 0]))
-        cylinderEntity.transform = Transform(
-            matrix: float4x4(rows: cylinderTransformMatrix.rows.map { SIMD4($0.map { Float($0) }) })
+        cylinderEntity.setTransformMatrix(
+            float4x4(rows: cylinderTransformMatrix.rows.map { SIMD4($0.map { Float($0) }) }),
+            relativeTo: nil,
         )
 
         startSphereEntity.setPosition(SIMD3(startVertex.component.map { Float($0) }), relativeTo: nil)
