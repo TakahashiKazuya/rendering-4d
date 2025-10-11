@@ -22,13 +22,13 @@ struct PrimitiveRenderingView: View {
 
             // light
             let lightEntity = DirectionalLight()
-            lightEntity.position = [4, 8, 2]
+            lightEntity.setPosition([4, 8, 2], relativeTo: nil)
             lightEntity.look(at: [0, 0, 0], from: lightEntity.position, relativeTo: nil)
             content.add(lightEntity)
 
             // camera
             let cameraEntity = PerspectiveCamera()
-            cameraEntity.position = [3, 4, 6]
+            cameraEntity.setPosition([3, 4, 6], relativeTo: nil)
             cameraEntity.look(at: [0, 0, 0], from: cameraEntity.position, relativeTo: nil)
             content.add(cameraEntity)
         }
@@ -77,12 +77,13 @@ struct PrimitiveRenderingView: View {
                 ])
             )
             * Matrix.of3DAffineTranslation(by: Vector([0, length / 2, 0]))
-        cylinderEntity.transform = Transform(
-            matrix: float4x4(rows: cylinderTransformMatrix.rows.map { SIMD4($0.map { Float($0) }) })
+        cylinderEntity.setTransformMatrix(
+            float4x4(rows: cylinderTransformMatrix.rows.map { SIMD4($0.map { Float($0) }) }),
+            relativeTo: nil,
         )
 
-        startSphereEntity.position = SIMD3(startVertex.component.map { Float($0) })
-        endSphereEntity.position = SIMD3(endVertex.component.map { Float($0) })
+        startSphereEntity.setPosition(SIMD3(startVertex.component.map { Float($0) }), relativeTo: nil)
+        endSphereEntity.setPosition(SIMD3(endVertex.component.map { Float($0) }), relativeTo: nil)
 
         let anchorEntity = AnchorEntity()
         anchorEntity.addChild(startSphereEntity)
